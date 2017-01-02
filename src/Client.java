@@ -66,6 +66,7 @@ public class Client {
 			e1.printStackTrace();
 		}
 
+		//connexion à un client
 		try {
 			socketOut = new Socket("127.0.0.1", portOut);
 		} catch (IOException e) {
@@ -74,27 +75,34 @@ public class Client {
 		}
 		System.out.println("je parle à "+socketOut.getPort());
 
-		//creation messagerie. Sortie : 1er client
-		MessageListener msgL = new MessageListener(socketOut, server);
-		Thread t = new Thread(msgL);
-		t.start();
+		//envoi du port sur écoute
+		try {
+			out.write(portIn+"Bonjour "+portOut+"\n");
+			out.flush();
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
 
 		while(!Thread.interrupted()){
 			//écoute
+			System.out.println("attente de connexion");
 			try {
 				socketIn = server.accept();
 			} catch (IOException e2) {
 				e2.printStackTrace();
 			}
 			portIn = socketIn.getLocalPort();
+			System.out.println("connexion "+portIn);
 			try {
 				input = new InputStreamReader(socketIn.getInputStream());
 			} catch (IOException e2) {
 				e2.printStackTrace();
 			}
+			MessageListener msgL = new MessageListener(socketOut, server, new BufferedReader(input));
+			Thread t = new Thread(msgL);
+			t.start();
 			msgL.in = new BufferedReader(input);
 
-			System.out.println("maintenant j'ecoute port "+portIn);
 		}
 
 	}
