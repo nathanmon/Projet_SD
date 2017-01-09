@@ -6,8 +6,12 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Client {
 
+	public static int myId;
 	private static BufferedWriter out;
 	private static BufferedReader in;
 	public static void main(String[] args) {
@@ -61,6 +65,7 @@ public class Client {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+				//envoyer("")
 			}
 		} catch (IOException e1) {
 			e1.printStackTrace();
@@ -106,5 +111,22 @@ public class Client {
 		}
 
 	}
-
+	
+	private static void envoyer(String type, Object msg) {
+		JSONObject json = new JSONObject();
+		try {
+			json.put("id", myId);
+			json.put("type", type);
+			json.put("msg", msg);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		try {
+			out.write(json.toString());
+			out.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
 }
