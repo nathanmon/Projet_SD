@@ -1,7 +1,5 @@
 terminal à Projet_SD/bin
-set classpath=java-json.jar;.
-java Annuaire
+java -cp java-json.jar;. Annuaire
 
 terminaux à Projet_SD/bin
-set classpath=java-json.jar;.
-java Client
+java -cp java-json.jar;. Client
