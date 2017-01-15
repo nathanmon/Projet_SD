@@ -5,8 +5,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,8 +30,7 @@ public class Annuaire {
 		while(!Thread.interrupted()){
 			try {
 				socket = server.accept();
-				System.out.println("connexion ! port client : "+socket.getPort());
-				OutputStreamWriter output = new OutputStreamWriter(socket.getOutputStream(),"UTF-8");
+				OutputStreamWriter output = new OutputStreamWriter(socket.getOutputStream());
 				out = new BufferedWriter(output);
 				InputStreamReader input = new InputStreamReader(socket.getInputStream());
 				in = new BufferedReader(input);
@@ -54,7 +51,6 @@ public class Annuaire {
 	private static JSONObject lire() {
 		JSONObject json = null;
 		String maLigne = null;
-		System.out.println("attente d'un msg");
 		try {
 			maLigne = in.readLine();
 			System.out.println("reception : "+maLigne);
@@ -78,10 +74,9 @@ public class Annuaire {
 			e.printStackTrace();
 		}
 		try {
-			System.out.println("json : "+json);
+			System.out.println("envoi : "+json);
 			out.write(json+"\n");
 			out.flush();
-			System.out.println("msg envoyé");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
