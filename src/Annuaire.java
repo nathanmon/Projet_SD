@@ -35,7 +35,7 @@ public class Annuaire {
 				InputStreamReader input = new InputStreamReader(socket.getInputStream());
 				in = new BufferedReader(input);
 				try {
-					listDest.put(lire().get("port"));
+					ajouterDest(lire().getInt("port"));
 				} catch (JSONException e) {
 					e.printStackTrace();
 				}
@@ -46,6 +46,30 @@ public class Annuaire {
 			id++;
 		}
 
+	}
+
+	private static void ajouterDest(int port){
+		if(listDest.length()>0){
+			try {
+				listDest.put(listDest.getInt(listDest.length()-1));
+			} catch (JSONException e1) {
+				e1.printStackTrace();
+			}
+			for(int i=listDest.length();i>1;i--){
+				try {
+					listDest.put(i-1,listDest.getInt(i-2));
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		try {
+			listDest.put(0,port);
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		if(listDest.length()>5)
+			listDest.remove(listDest.length()-1);
 	}
 
 	private static JSONObject lire() {

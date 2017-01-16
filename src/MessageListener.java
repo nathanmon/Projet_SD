@@ -1,4 +1,3 @@
-
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -7,8 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MessageListener implements Runnable{
-
-
+	
 	public MessageListener() {
 	}
 
@@ -21,40 +19,43 @@ public class MessageListener implements Runnable{
 		while(true){
 			//boucle msgs
 			while(!Thread.interrupted()){
-				String maLigne = null;
 				int expediteur = 0;
 				json = Client.lire();
-				String type = null;
-				try {
-					type = json.getString("type");
-				} catch (JSONException e2) {
-					e2.printStackTrace();
-				}
-				try {
-					expediteur = json.getInt("id");
-					if(expediteur != Client.myId){
-						if(type.equals("msg")){//réception d'un msg
-							maLigne = json.getString("msg");
-							System.out.println("Client "+expediteur+" : "+maLigne);
-						}
-						else if (type.equals("hello")){//réception d'une insertion dans l'anneau
-							if(Client.socketOut.getPort()==json.getInt("oldPort")){
+				if(json != null) {
+					String type = null;
+					try {
+						type = json.getString("type");
+					} catch (JSONException e2) {
+						e2.printStackTrace();
+					}
+					try {
+						expediteur = json.getInt("id");
+						if(expediteur != Client.myId){
+							if(type.equals("msg")){//réception d'un msg
+								System.out.println("Client "+expediteur+" : "+json.getString("msg"));
+							}
+							if (type.equals("hello")&&Client.socketOut.getPort()==json.getInt("oldPort")){
 								try {
 									Client.socketOut = new Socket("127.0.0.1",json.getInt("newPort"));
-									Client.out = new BufferedWriter(new OutputStreamWriter(Client.socketOut.getOutputStream()));
+									Client.out = new BufferedWriter(new OutputStreamWriter(Client.socketOut.getOutputStream(),"UTF-8"));
 									System.out.println("maintenant je parle à "+Client.socketOut.getPort());
 								} catch (IOException e) {
 									e.printStackTrace();
 								}
 							}
-							
+							else//faire suivre
+								Client.envoyer(json);
+							if(type.equals("hello")&&Client.server.getLocalPort()==json.getInt("oldPort")){
+								Client.precedent=json.getInt("newPort");
+							}
 						}
-						//faire suivre
-						Client.envoyer(json);
+						else if (type.equals("msg")){
+							System.out.println("Vous : "+json.getString("msg"));
+						}
 					}
-				}
-				catch (JSONException e1) {
-					e1.printStackTrace();
+					catch (JSONException e1) {
+						e1.printStackTrace();
+					}
 				}
 			}
 		}

@@ -2,12 +2,11 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Messagerie  implements Runnable {
-
+public class Messagerie implements Runnable {
+	
 	public Messagerie() {
 	}
 
@@ -15,7 +14,8 @@ public class Messagerie  implements Runnable {
 	public void run() {
 		String str;
 		InputStream inputS = System.in;
-		InputStreamReader inputSR = new InputStreamReader(inputS);
+		InputStreamReader inputSR = null;
+		inputSR = new InputStreamReader(inputS);
 		BufferedReader in = new BufferedReader(inputSR);
 
 		while(!Thread.interrupted()){
