@@ -243,7 +243,7 @@ public class Client extends JFrame  implements ActionListener {
 			salon3.setBackground(Color.white);
 			salon4.setBackground(Color.white);
 			salon="salon 1";
-			tchat.setText("vous rejoignez le salon 1\n");
+			tchat.setText("");
 			try {
 				envoyer( new JSONObject().put("type", "salon").put("pseudo", pseudo).put("id", Client.myId).put("salon", salon));
 			} catch (JSONException e) {
@@ -256,7 +256,7 @@ public class Client extends JFrame  implements ActionListener {
 			salon3.setBackground(Color.white);
 			salon4.setBackground(Color.white);
 			salon="salon 2";
-			tchat.setText("vous rejoignez le salon 2\n");
+			tchat.setText("");
 			try {
 				envoyer( new JSONObject().put("type", "salon").put("pseudo", pseudo).put("id", Client.myId).put("salon", salon));
 			} catch (JSONException e) {
@@ -269,7 +269,7 @@ public class Client extends JFrame  implements ActionListener {
 			salon3.setBackground(Color.blue);
 			salon4.setBackground(Color.white);
 			salon="salon 3";
-			tchat.setText("vous rejoignez le salon 3\n");
+			tchat.setText("");
 			try {
 				envoyer( new JSONObject().put("type", "salon").put("pseudo", pseudo).put("id", Client.myId).put("salon", salon));
 			} catch (JSONException e) {
@@ -282,7 +282,7 @@ public class Client extends JFrame  implements ActionListener {
 			salon3.setBackground(Color.white);
 			salon4.setBackground(Color.blue);
 			salon="salon 4";
-			tchat.setText("vous rejoignez le salon 4\n");
+			tchat.setText("");
 			try {
 				envoyer( new JSONObject().put("type", "salon").put("pseudo", pseudo).put("id", Client.myId).put("salon", salon));
 			} catch (JSONException e) {
