@@ -31,11 +31,18 @@ public class MessageListener implements Runnable{
 					try {
 						expediteur = json.getInt("id");
 						if(expediteur != Client.myId){
+							if(type.equals("salon")&&json.getString("salon").equals(Client.salon)){
+								Client.tchat.setText(json.getString("pseudo")+" a rejoint le salon.\n"+Client.tchat.getText());
+							}
 							if(type.equals("msg")){//réception d'un msg
-								System.out.println("Client "+expediteur+" : "+json.getString("msg"));
+								System.out.println(json.getString("pseudo")+" : "+json.getString("msg"));
+								if(json.getString("salon").equals(Client.salon)){
+									Client.tchat.setText(json.getString("pseudo")+" : "+json.getString("msg")+"\n"+Client.tchat.getText());
+								}
 							}
 							if (type.equals("hello")&&Client.socketOut.getPort()==json.getInt("oldPort")){
 								try {
+									Client.socketOut.close();
 									Client.socketOut = new Socket("127.0.0.1",json.getInt("newPort"));
 									Client.out = new BufferedWriter(new OutputStreamWriter(Client.socketOut.getOutputStream(),"UTF-8"));
 									System.out.println("maintenant je parle à "+Client.socketOut.getPort());
@@ -49,8 +56,14 @@ public class MessageListener implements Runnable{
 								Client.precedent=json.getInt("newPort");
 							}
 						}
-						else if (type.equals("msg")){
+						else{
+							if (type.equals("msg")){
 							System.out.println("Vous : "+json.getString("msg"));
+							Client.tchat.setText("Vous : "+json.getString("msg")+"\n"+Client.tchat.getText());
+						}
+							if (type.equals("salon")){
+								Client.tchat.setText("Vous avez rejoint le "+json.getString("salon")+"\n"+Client.tchat.getText());
+							}
 						}
 					}
 					catch (JSONException e1) {

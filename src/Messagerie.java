@@ -33,7 +33,7 @@ public class Messagerie implements Runnable {
 	private void ecrire(String str){
 		JSONObject json = null;
 		try {
-			json = new JSONObject().put("type", "msg").put("msg", str).put("id", Client.myId);
+			json = new JSONObject().put("type", "msg").put("msg", str).put("id", Client.myId).put("salon", Client.salon).put("pseudo", Client.pseudo);
 		} catch (JSONException e1) {
 			e1.printStackTrace();
 		}
