@@ -6,7 +6,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MessageListener implements Runnable{
-	
+
 	public MessageListener() {
 	}
 
@@ -33,6 +33,7 @@ public class MessageListener implements Runnable{
 						if(expediteur != Client.myId){
 							if(type.equals("salon")&&json.getString("salon").equals(Client.salon)){
 								Client.tchat.setText(json.getString("pseudo")+" a rejoint le salon.\n"+Client.tchat.getText());
+								json.put("roomList", json.getJSONArray("roomList").put(Client.pseudo));
 							}
 							if(type.equals("msg")){//réception d'un msg
 								System.out.println(json.getString("pseudo")+" : "+json.getString("msg"));
@@ -40,7 +41,7 @@ public class MessageListener implements Runnable{
 									Client.tchat.setText(json.getString("pseudo")+" : "+json.getString("msg")+"\n"+Client.tchat.getText());
 								}
 							}
-							if (type.equals("hello")&&Client.socketOut.getPort()==json.getInt("oldPort")){
+							if (type.equals("ring")&&Client.socketOut.getPort()==json.getInt("oldPort")){
 								try {
 									Client.socketOut.close();
 									Client.socketOut = new Socket("127.0.0.1",json.getInt("newPort"));
@@ -50,19 +51,19 @@ public class MessageListener implements Runnable{
 									e.printStackTrace();
 								}
 							}
-							else//faire suivre
-								Client.envoyer(json);
-							if(type.equals("hello")&&Client.server.getLocalPort()==json.getInt("oldPort")){
-								Client.precedent=json.getInt("newPort");
+							if(type.equals("ring")&&Client.server.getLocalPort()==json.getInt("myNext")){
+								Client.precedent=json.getInt("myPort");
+								System.out.println(Client.precedent+" me parle");
 							}
+							Client.envoyer(json);
 						}
 						else{
 							if (type.equals("msg")){
-							System.out.println("Vous : "+json.getString("msg"));
-							Client.tchat.setText("Vous : "+json.getString("msg")+"\n"+Client.tchat.getText());
-						}
+								System.out.println("Vous : "+json.getString("msg"));
+								Client.tchat.setText("Vous : "+json.getString("msg")+"\n"+Client.tchat.getText());
+							}
 							if (type.equals("salon")){
-								Client.tchat.setText("Vous avez rejoint le "+json.getString("salon")+"\n"+Client.tchat.getText());
+								Client.tchat.setText("Vous avez rejoint "+json.getJSONArray("roomList")+" au "+json.getString("salon")+".\n"+Client.tchat.getText());
 							}
 						}
 					}
@@ -73,4 +74,6 @@ public class MessageListener implements Runnable{
 			}
 		}
 	}
+
+
 }

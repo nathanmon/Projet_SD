@@ -43,7 +43,7 @@ public class Client extends JFrame  implements ActionListener {
 	public static String salon = "salon 1";
 	public static String pseudo = "Anonyme";
 	private static JTextField pseudoField;
-	
+
 	public Client() {
 		super("Tchat");
 		setMinimumSize(new Dimension(500, 500));
@@ -77,7 +77,6 @@ public class Client extends JFrame  implements ActionListener {
 		salons.add(salon4);
 		tchat = new JTextPane();
 		tchat.setBackground(new Color(160,200,250));
-		tchat.setText("vous avez rejoint le salon 1.\n");
 		tchat.setEditable(false);
 		JScrollPane jsp = new JScrollPane(tchat);
 		jsp.setMinimumSize(new Dimension(500,200));
@@ -88,11 +87,11 @@ public class Client extends JFrame  implements ActionListener {
 		lePanel.add(entree, BorderLayout.PAGE_END);
 		setVisible(true);
 	}
-	
+
 	public static void main(String[] args) throws InterruptedException {
 
 		new Client();
-		
+
 		//creation de son ecoute dans la boucle
 		try {
 			server = new ServerSocket(0);
@@ -125,20 +124,34 @@ public class Client extends JFrame  implements ActionListener {
 			JSONObject json = lire();
 			myId = json.getInt("id");
 			pseudo+=myId;
+			pseudoField.setText(pseudo);
 			listDest = (JSONArray) json.get("listDest");
 			socketOut.close();
-			if(listDest.length()>1)
+			if(listDest.length()>1){
 				try{
 					socketOut = new Socket("127.0.0.1", listDest.getInt(1));
 				} catch (IOException e1) {
-					try{
-						socketOut = new Socket("127.0.0.1", listDest.getInt(2));
-					} catch (IOException e2) {
-						socketOut = new Socket("127.0.0.1", listDest.getInt(3));
+					if(listDest.length()>2){
+						try{
+							socketOut = new Socket("127.0.0.1", listDest.getInt(2));
+						} catch (IOException e2) {
+							if(listDest.length()>3){
+								socketOut = new Socket("127.0.0.1", listDest.getInt(3));
+							}
+							else {
+								socketOut = new Socket("127.0.0.1", listDest.getInt(0));
+							}
+						}
+					}
+					else {
+						socketOut = new Socket("127.0.0.1", listDest.getInt(0));
 					}
 				}
-			else
+			}
+			else {
 				socketOut = new Socket("127.0.0.1", listDest.getInt(0));
+			}
+			listDest = new JSONArray().put(server.getLocalPort());
 			out = new BufferedWriter(new OutputStreamWriter(socketOut.getOutputStream(),"UTF-8"));
 		} catch (IOException | JSONException e) {
 			e.printStackTrace();
@@ -147,7 +160,8 @@ public class Client extends JFrame  implements ActionListener {
 
 		//insertion dans la boucle : envoi de son port sur ecoute
 		try {
-			envoyer(new JSONObject().put("type", "hello").put("oldPort",socketOut.getPort()).put("newPort",server.getLocalPort()).put("id", myId));
+			envoyer(new JSONObject().put("type", "ring").put("oldPort",socketOut.getPort()).put("newPort",server.getLocalPort()).put("id", myId).put("myPort", server.getLocalPort()).put("myNext", socketOut.getPort()));
+			JoinChatRoom(salon);
 		} catch (JSONException e1) {
 			e1.printStackTrace();
 		}
@@ -206,16 +220,19 @@ public class Client extends JFrame  implements ActionListener {
 				e.printStackTrace();
 			}
 		} catch (IOException e) {
-			//insertion dans la boucle : envoi de son port sur ecoute
-			if(precedent!=socketOut.getPort())
+			//réinsertion dans la boucle : envoi de son port sur ecoute
+			if(precedent!=socketOut.getPort())//si il y avait au moins 3 clients
 				try {
-					envoyer(new JSONObject().put("type", "hello").put("oldPort",precedent).put("newPort",server.getLocalPort()).put("id", myId));
+					if(precedent!=0)
+						envoyer(new JSONObject().put("type", "ring").put("oldPort",precedent).put("newPort",server.getLocalPort()).put("id", myId).put("myPort", server.getLocalPort()).put("myNext", socketOut.getPort()));
 				} 
 			catch (JSONException e1) {
 				e1.printStackTrace();
 			}
-			else{
+			else{//si ils etaient 2 clients
 				try {
+					precedent=server.getLocalPort();
+					System.out.println("connexion à moi meme port "+precedent);
 					socketOut.close();
 					socketOut = new Socket("127.0.0.1",precedent);
 					out = new BufferedWriter(new OutputStreamWriter(socketOut.getOutputStream(),"UTF-8"));
@@ -226,29 +243,33 @@ public class Client extends JFrame  implements ActionListener {
 		}
 		return json;
 	}
+	
+	private static void JoinChatRoom(String room){
+		try {
+			envoyer( new JSONObject().put("type", "salon").put("pseudo", pseudo).put("id", Client.myId).put("salon", salon).put("roomList", new JSONArray()));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+	}
 
 	@Override
 	public void actionPerformed(ActionEvent action) {
 		if(action.getSource()==entree){
-		try {
-			envoyer( new JSONObject().put("type", "msg").put("msg", entree.getText()).put("id", Client.myId).put("salon", salon).put("pseudo", pseudo));
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		entree.setText("");
+			try {
+				envoyer( new JSONObject().put("type", "msg").put("msg", entree.getText()).put("id", Client.myId).put("salon", salon).put("pseudo", pseudo));
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			entree.setText("");
 		}
 		if(action.getSource()==salon1){
+			salon="salon 1";
 			salon1.setBackground(Color.blue);
 			salon2.setBackground(Color.white);
 			salon3.setBackground(Color.white);
 			salon4.setBackground(Color.white);
-			salon="salon 1";
 			tchat.setText("");
-			try {
-				envoyer( new JSONObject().put("type", "salon").put("pseudo", pseudo).put("id", Client.myId).put("salon", salon));
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			JoinChatRoom(salon);
 		}
 		if(action.getSource()==salon2){
 			salon1.setBackground(Color.white);
@@ -257,11 +278,7 @@ public class Client extends JFrame  implements ActionListener {
 			salon4.setBackground(Color.white);
 			salon="salon 2";
 			tchat.setText("");
-			try {
-				envoyer( new JSONObject().put("type", "salon").put("pseudo", pseudo).put("id", Client.myId).put("salon", salon));
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			JoinChatRoom(salon);
 		}
 		if(action.getSource()==salon3){
 			salon1.setBackground(Color.white);
@@ -270,11 +287,7 @@ public class Client extends JFrame  implements ActionListener {
 			salon4.setBackground(Color.white);
 			salon="salon 3";
 			tchat.setText("");
-			try {
-				envoyer( new JSONObject().put("type", "salon").put("pseudo", pseudo).put("id", Client.myId).put("salon", salon));
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			JoinChatRoom(salon);
 		}
 		if(action.getSource()==salon4){
 			salon1.setBackground(Color.white);
@@ -283,11 +296,7 @@ public class Client extends JFrame  implements ActionListener {
 			salon4.setBackground(Color.blue);
 			salon="salon 4";
 			tchat.setText("");
-			try {
-				envoyer( new JSONObject().put("type", "salon").put("pseudo", pseudo).put("id", Client.myId).put("salon", salon));
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
+			JoinChatRoom(salon);
 		}
 		if(action.getSource()==pseudoField){
 			pseudo=pseudoField.getText();
