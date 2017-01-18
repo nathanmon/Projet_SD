@@ -92,40 +92,47 @@ public class Client extends JFrame  implements ActionListener {
 
 		new Client();
 
-		//creation de son ecoute dans la boucle
+		//creation du port sur ecoute
 		try {
 			server = new ServerSocket(0);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		//connexion à l'annuaire
-		try {
-			socketOut = new Socket("127.0.0.1", 12000);
-			out = new BufferedWriter(new OutputStreamWriter(socketOut.getOutputStream(),"UTF-8"));
-		} catch (IOException e) {
-			e.printStackTrace();
+		//contacter l'annuaire afin de récupérer la liste JSONArray listDest des clients les plus récents
+		FindMainChord();
+
+		//entrer dans l'anneau
+		JoinMainChord();
+
+		//thread qui attend l'arrivee de messages
+		MessageListener msgL = new MessageListener();
+		Thread t = new Thread(msgL);
+		t.start();
+
+		//thread qui attend les commandes par le terminal
+		Messagerie chat = new Messagerie();
+		Thread t2 = new Thread(chat);
+		t2.start();
+
+		//boucle attente connexion de nouveaux clientx
+		while(!Thread.interrupted()){
+			try {
+				socketIn = server.accept();
+				in=new BufferedReader(new InputStreamReader(socketIn.getInputStream(),"UTF-8"));
+				t.interrupt();
+				t = new Thread(msgL);
+				t.start();
+				System.out.println("un client s'est connecté");
+			} catch (IOException e2) {
+				e2.printStackTrace();
+			}
 		}
 
-		//envoi du port sur ecoute
-		try {
-			envoyer(new JSONObject().put("port", server.getLocalPort()));
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
+	}
 
-		//récupération de mon id et du port du 1er client
-		try {
-			in = new BufferedReader(new InputStreamReader(socketOut.getInputStream(),"UTF-8"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		try {
-			JSONObject json = lire();
-			myId = json.getInt("id");
-			pseudo+=myId;
-			pseudoField.setText(pseudo);
-			listDest = (JSONArray) json.get("listDest");
+	private static void JoinMainChord() {
+		try{
 			socketOut.close();
 			if(listDest.length()>1){
 				try{
@@ -158,37 +165,43 @@ public class Client extends JFrame  implements ActionListener {
 		}
 		System.out.println("je suis le Client "+myId+", j'ecoute port "+server.getLocalPort());
 
-		//insertion dans la boucle : envoi de son port sur ecoute
+		//envoi de son port sur ecoute
 		try {
 			envoyer(new JSONObject().put("type", "ring").put("oldPort",socketOut.getPort()).put("newPort",server.getLocalPort()).put("id", myId).put("myPort", server.getLocalPort()).put("myNext", socketOut.getPort()));
 			JoinChatRoom(salon);
 		} catch (JSONException e1) {
 			e1.printStackTrace();
 		}
+		
+	}
 
-		MessageListener msgL = new MessageListener();
-		Thread t = new Thread(msgL);
-		t.start();
-
-		Messagerie chat = new Messagerie();
-		Thread t2 = new Thread(chat);
-		t2.start();
-
-		//boucle attente de nouveau client
-		while(!Thread.interrupted()){
-			//écoute
-			try {
-				socketIn = server.accept();
-				in=new BufferedReader(new InputStreamReader(socketIn.getInputStream(),"UTF-8"));
-				t.interrupt();
-				t = new Thread(msgL);
-				t.start();
-				System.out.println("un client s'est connecté");
-			} catch (IOException e2) {
-				e2.printStackTrace();
-			}
+	private static void FindMainChord() {
+		//connexion à l'annuaire
+		try {
+			socketOut = new Socket("127.0.0.1", 12000);
+			out = new BufferedWriter(new OutputStreamWriter(socketOut.getOutputStream(),"UTF-8"));
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
+		//envoi du port sur ecoute
+		try {
+			envoyer(new JSONObject().put("port", server.getLocalPort()));
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+
+		//récupération de mon id et du port du 1er client
+		try {
+			in = new BufferedReader(new InputStreamReader(socketOut.getInputStream(),"UTF-8"));
+			JSONObject json = lire();
+			myId = json.getInt("id");
+			pseudo+=myId;
+			pseudoField.setText(pseudo);
+			listDest = (JSONArray) json.get("listDest");
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	static void envoyer(JSONObject json) {
@@ -220,7 +233,7 @@ public class Client extends JFrame  implements ActionListener {
 				e.printStackTrace();
 			}
 		} catch (IOException e) {
-			//réinsertion dans la boucle : envoi de son port sur ecoute
+			//il a pas dit enrevoir : réinsertion dans la boucle : envoi de son port sur ecoute
 			if(precedent!=socketOut.getPort())//si il y avait au moins 3 clients
 				try {
 					if(precedent!=0)
@@ -229,7 +242,7 @@ public class Client extends JFrame  implements ActionListener {
 			catch (JSONException e1) {
 				e1.printStackTrace();
 			}
-			else{//si ils etaient 2 clients
+			else{//si il y avait 2 clients
 				try {
 					precedent=server.getLocalPort();
 					System.out.println("connexion à moi meme port "+precedent);
@@ -243,7 +256,7 @@ public class Client extends JFrame  implements ActionListener {
 		}
 		return json;
 	}
-	
+
 	private static void JoinChatRoom(String room){
 		try {
 			envoyer( new JSONObject().put("type", "salon").put("pseudo", pseudo).put("id", Client.myId).put("salon", salon).put("roomList", new JSONArray()));
