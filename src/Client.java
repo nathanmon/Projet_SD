@@ -172,7 +172,7 @@ public class Client extends JFrame  implements ActionListener {
 		} catch (JSONException e1) {
 			e1.printStackTrace();
 		}
-		
+
 	}
 
 	private static void FindMainChord() {
@@ -234,13 +234,14 @@ public class Client extends JFrame  implements ActionListener {
 			}
 		} catch (IOException e) {
 			//il a pas dit enrevoir : réinsertion dans la boucle : envoi de son port sur ecoute
-			if(precedent!=socketOut.getPort())//si il y avait au moins 3 clients
+			if(precedent!=socketOut.getPort()){//si il y avait au moins 3 clients
 				try {
 					if(precedent!=0)
 						envoyer(new JSONObject().put("type", "ring").put("oldPort",precedent).put("newPort",server.getLocalPort()).put("id", myId).put("myPort", server.getLocalPort()).put("myNext", socketOut.getPort()));
 				} 
-			catch (JSONException e1) {
-				e1.printStackTrace();
+				catch (JSONException e1) {
+					e1.printStackTrace();
+				}
 			}
 			else{//si il y avait 2 clients
 				try {
