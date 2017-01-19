@@ -47,6 +47,7 @@ public class MessageListener implements Runnable{
 									Client.socketOut = new Socket("127.0.0.1",json.getInt("newPort"));
 									Client.out = new BufferedWriter(new OutputStreamWriter(Client.socketOut.getOutputStream(),"UTF-8"));
 									System.out.println("maintenant je parle à "+Client.socketOut.getPort());
+									Client.envoyer(new JSONObject().put("type", "hello").put("port", Client.server.getLocalPort()).put("id", Client.myId));
 								} catch (IOException e) {
 									e.printStackTrace();
 								}
@@ -55,6 +56,9 @@ public class MessageListener implements Runnable{
 								Client.precedent=json.getInt("myPort");
 								System.out.println(Client.precedent+" me parle");
 							}
+							if(type.equals("hello"))
+								Client.precedent=json.getInt("port");
+							else
 							Client.envoyer(json);
 						}
 						else{

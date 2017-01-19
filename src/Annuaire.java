@@ -1,3 +1,4 @@
+import java.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -5,22 +6,33 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import javax.swing.JFrame;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
-public class Annuaire {
+public class Annuaire extends JFrame {
 
+	private static final long serialVersionUID = 1L;
 	private static BufferedWriter out;
 	private static BufferedReader in;
 	private static JSONArray listDest = new JSONArray();
 
+	public Annuaire() {
+		super("Annuaire");
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+		setSize(new Dimension(500, 100));
+		setVisible(true);
+	}
+	
 	public static void main(String args[]) {
 
+		new Annuaire();
+		
 		ServerSocket server = null;
 		Socket socket = null;
 		int id = 1;
-
+		
 		try {
 			server = new ServerSocket(12000);
 			System.out.println("annuaire ecoute port 12000");

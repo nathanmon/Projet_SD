@@ -11,7 +11,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -19,11 +18,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
-
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 
 public class Client extends JFrame  implements ActionListener {
 
@@ -47,7 +44,7 @@ public class Client extends JFrame  implements ActionListener {
 	public Client() {
 		super("Tchat");
 		setMinimumSize(new Dimension(500, 500));
-		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
 		lePanel = new JPanel(new BorderLayout());
 		lePanel.setLayout(new BoxLayout(lePanel, BoxLayout.PAGE_AXIS));
@@ -168,7 +165,9 @@ public class Client extends JFrame  implements ActionListener {
 			e.printStackTrace();
 		}
 		System.out.println("je suis le Client "+myId+", j'ecoute port "+server.getLocalPort());
-
+		if(server.getLocalPort()==socketOut.getPort())
+			precedent=socketOut.getPort();
+		
 		//envoi de son port sur ecoute
 		try {
 			envoyer(new JSONObject().put("type", "ring").put("oldPort",socketOut.getPort()).put("newPort",server.getLocalPort()).put("id", myId).put("myPort", server.getLocalPort()).put("myNext", socketOut.getPort()));
@@ -185,7 +184,7 @@ public class Client extends JFrame  implements ActionListener {
 			socketOut = new Socket("127.0.0.1", 12000);
 			out = new BufferedWriter(new OutputStreamWriter(socketOut.getOutputStream(),"UTF-8"));
 		} catch (IOException e) {
-			e.printStackTrace();
+			tchat.setText("Connexion impossible.");
 		}
 
 		//envoi du port sur ecoute
@@ -214,7 +213,6 @@ public class Client extends JFrame  implements ActionListener {
 			out.write(json+"\n");
 			out.flush();
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}	
 
