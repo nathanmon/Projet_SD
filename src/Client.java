@@ -12,8 +12,11 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import javax.swing.BoxLayout;
+import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
@@ -36,10 +39,12 @@ public class Client extends JFrame  implements ActionListener {
 	public static JTextPane tchat;
 	private static JSONArray listDest;
 	private static JPanel lePanel;
-	private static JButton salon1, salon2, salon3, salon4;
 	public static String salon = "salon 1";
+	public static JComboBox<String> boxSalon;
+	public static JButton newSalon;
 	public static String pseudo = "Anonyme";
 	private static JTextField pseudoField;
+	public static JSONArray listSalon =  new JSONArray().put("Salon 1");
 
 	public Client() {
 		super("Tchat");
@@ -56,22 +61,17 @@ public class Client extends JFrame  implements ActionListener {
 		JPanel salons = new JPanel(new GridLayout(1,4));
 		salons.setMaximumSize(new Dimension(500,100));
 		lePanel.add(salons);
-		salon1 = new JButton("Salon 1");
-		salon1.addActionListener(this);
-		salons.add(salon1);
-		salon2 = new JButton("Salon 2");
-		salon2.addActionListener(this);
-		salons.add(salon2);
-		salon3 = new JButton("Salon 3");
-		salon3.addActionListener(this);
-		salons.add(salon3);
-		salon4 = new JButton("Salon 4");
-		salon4.addActionListener(this);
-		salon1.setBackground(Color.blue);
-		salon2.setBackground(Color.white);
-		salon3.setBackground(Color.white);
-		salon4.setBackground(Color.white);
-		salons.add(salon4);
+		try {
+			boxSalon = new JComboBox(JSONArrayToStringTab(listSalon));
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		boxSalon.addActionListener(this);
+		salons.add(boxSalon);
+		newSalon = new JButton("Creer nouveau salon");	
+		newSalon.addActionListener(this);
+		salons.add(newSalon);
 		tchat = new JTextPane();
 		tchat.setBackground(new Color(160,200,250));
 		tchat.setEditable(false);
@@ -83,6 +83,14 @@ public class Client extends JFrame  implements ActionListener {
 		entree.addActionListener(this);
 		lePanel.add(entree, BorderLayout.PAGE_END);
 		setVisible(true);
+	}
+	
+	public String[] JSONArrayToStringTab(JSONArray jsonA) throws JSONException{
+		String[] newTab = new String[jsonA.length()];
+		for(int i=0; i<jsonA.length(); i++){
+			newTab[i] = jsonA.getString(i);
+		}
+		return newTab;
 	}
 
 	public static void main(String[] args) throws InterruptedException {
@@ -101,7 +109,7 @@ public class Client extends JFrame  implements ActionListener {
 
 		//entrer dans l'anneau
 		JoinMainChord();
-
+		
 		//thread qui attend l'arrivee de messages
 		MessageListener msgL = new MessageListener();
 		Thread t = new Thread(msgL);
@@ -283,45 +291,90 @@ public class Client extends JFrame  implements ActionListener {
 			}
 			entree.setText("");
 		}
-		if(action.getSource()==salon1){
-			salon="salon 1";
-			salon1.setBackground(Color.blue);
-			salon2.setBackground(Color.white);
-			salon3.setBackground(Color.white);
-			salon4.setBackground(Color.white);
-			tchat.setText("");
+		if(action.getSource()==boxSalon){
+			salon = boxSalon.getSelectedItem().toString();
 			JoinChatRoom(salon);
-		}
-		if(action.getSource()==salon2){
-			salon1.setBackground(Color.white);
-			salon2.setBackground(Color.blue);
-			salon3.setBackground(Color.white);
-			salon4.setBackground(Color.white);
-			salon="salon 2";
-			tchat.setText("");
-			JoinChatRoom(salon);
-		}
-		if(action.getSource()==salon3){
-			salon1.setBackground(Color.white);
-			salon2.setBackground(Color.white);
-			salon3.setBackground(Color.blue);
-			salon4.setBackground(Color.white);
-			salon="salon 3";
-			tchat.setText("");
-			JoinChatRoom(salon);
-		}
-		if(action.getSource()==salon4){
-			salon1.setBackground(Color.white);
-			salon2.setBackground(Color.white);
-			salon3.setBackground(Color.white);
-			salon4.setBackground(Color.blue);
-			salon="salon 4";
-			tchat.setText("");
-			JoinChatRoom(salon);
-		}
+			
+			}
+//			salon="salon 1";
+//			salon1.setBackground(Color.blue);
+//			salon2.setBackground(Color.white);
+//			salon3.setBackground(Color.white);
+//			salon4.setBackground(Color.white);
+//			tchat.setText("");
+//			JoinChatRoom(salon);
+		
+//		if(action.getSource()==salon2){
+//			salon1.setBackground(Color.white);
+//			salon2.setBackground(Color.blue);
+//			salon3.setBackground(Color.white);
+//			salon4.setBackground(Color.white);
+//			salon="salon 2";
+//			tchat.setText("");
+//			JoinChatRoom(salon);
+//		}
+//		if(action.getSource()==salon3){
+//			salon1.setBackground(Color.white);
+//			salon2.setBackground(Color.white);
+//			salon3.setBackground(Color.blue);
+//			salon4.setBackground(Color.white);
+//			salon="salon 3";
+//			tchat.setText("");
+//			JoinChatRoom(salon);
+//		}
+//		if(action.getSource()==salon4){
+//			salon1.setBackground(Color.white);
+//			salon2.setBackground(Color.white);
+//			salon3.setBackground(Color.white);
+//			salon4.setBackground(Color.blue);
+//			salon="salon 4";
+//			tchat.setText("");
+//			JoinChatRoom(salon);
+//		}
 		if(action.getSource()==pseudoField){
 			pseudo=pseudoField.getText();
 		}
+		
+		if(action.getSource()==newSalon){
+			ajouterSalon();
+		}
 	}
+	
+	public void ajouterSalon(){
+		JFrame frame = new JFrame();
+		frame.setSize(new Dimension(300, 300));
+		frame.setTitle("Ajout d'un nouveau salon");
+		JPanel panel = new JPanel(new GridLayout(3,1));
+		JLabel label = new JLabel("Entrez nom du salon");
+		JTextField zoneName = new JTextField();
+		JButton valider = new JButton("ok");
+		panel.add(label, BorderLayout.NORTH);
+		panel.add(zoneName, BorderLayout.SOUTH);
+		panel.add(valider);
+		frame.add(panel);
+		frame.setVisible(true);
+		JSONObject newSalon;
+		valider.addActionListener(new ActionListener(){
+
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				boxSalon.addItem(zoneName.getText());
+				listSalon.put(zoneName.getText());
+				boxSalon.revalidate();
+				boxSalon.repaint();
+				boxSalon.setVisible(false);
+				boxSalon.setVisible(true);
+				try {
+					envoyer(new JSONObject().put("type", "newSalon").put("nomSalon", zoneName.getText()).put("id", myId));
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+		});
+
+	}
+	
 
 }

@@ -52,6 +52,11 @@ public class MessageListener implements Runnable{
 									e.printStackTrace();
 								}
 							}
+							
+							if(type.equals("newSalon")){
+								Client.listSalon.put(json.getString("nomSalon"));
+								Client.boxSalon.addItem(json.getString("nomSalon"));
+							}
 							if(type.equals("ring")&&Client.server.getLocalPort()==json.getInt("myNext")){
 								Client.precedent=json.getInt("myPort");
 								System.out.println(Client.precedent+" me parle");
