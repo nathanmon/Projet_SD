@@ -4,9 +4,10 @@
 - messages en json de types "ring" (modification du l'anneau), "hello" (envoi du port sur ecoute au nouveau client n+1), "msg" (envoi d'un message sur le tchat) ou "salon" (changement de salon)
 - il y a 4 salons fixes et publics (tous les clients recoivent les msgs de tous les salons mais n'affichent que ceux du leur)
 
-execution eclipse :
+execution :
 Lancer Annuaire puis des Clients
 
 en ligne de commande :
-terminal à Projet_SD/bin : java -cp ../java-json.jar;. Annuaire
-terminaux à Projet_SD/bin : java -cp ../java-json.jar;. Client
+à Projet_SD/bin :
+java -cp ../java-json.jar;. Annuaire
+java -cp ../java-json.jar;. Client
