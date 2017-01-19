@@ -123,7 +123,7 @@ public class Client extends JFrame  implements ActionListener {
 				t.interrupt();
 				t = new Thread(msgL);
 				t.start();
-				System.out.println("un client s'est connecté");
+				System.out.println("connexion");
 			} catch (IOException e2) {
 				e2.printStackTrace();
 			}
@@ -143,7 +143,11 @@ public class Client extends JFrame  implements ActionListener {
 							socketOut = new Socket("127.0.0.1", listDest.getInt(2));
 						} catch (IOException e2) {
 							if(listDest.length()>3){
+								try{
 								socketOut = new Socket("127.0.0.1", listDest.getInt(3));
+								} catch (IOException e3) {
+									socketOut = new Socket("127.0.0.1", listDest.getInt(0));
+								}
 							}
 							else {
 								socketOut = new Socket("127.0.0.1", listDest.getInt(0));
@@ -236,8 +240,13 @@ public class Client extends JFrame  implements ActionListener {
 			//il a pas dit enrevoir : réinsertion dans la boucle : envoi de son port sur ecoute
 			if(precedent!=socketOut.getPort()){//si il y avait au moins 3 clients
 				try {
-					if(precedent!=0)
+					if(precedent!=0){
 						envoyer(new JSONObject().put("type", "ring").put("oldPort",precedent).put("newPort",server.getLocalPort()).put("id", myId).put("myPort", server.getLocalPort()).put("myNext", socketOut.getPort()));
+						try {
+							Thread.sleep(10);
+						} catch (InterruptedException e1) {
+						}
+					}
 				} 
 				catch (JSONException e1) {
 					e1.printStackTrace();
