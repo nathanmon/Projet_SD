@@ -7,6 +7,8 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import javax.swing.JFrame;
+import javax.swing.JTextPane;
+
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,12 +19,16 @@ public class Annuaire extends JFrame {
 	private static BufferedWriter out;
 	private static BufferedReader in;
 	private static JSONArray listDest = new JSONArray();
+	private static JTextPane pan;
 
 	public Annuaire() {
 		super("Annuaire");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setSize(new Dimension(500, 100));
 		setVisible(true);
+		pan = new JTextPane();
+		pan.setEditable(false);
+		add(pan);
 	}
 	
 	public static void main(String args[]) {
@@ -36,8 +42,10 @@ public class Annuaire extends JFrame {
 		try {
 			server = new ServerSocket(12000);
 			System.out.println("annuaire ecoute port 12000");
+			pan.setText("Running");
 		} catch (IOException e) {
 			e.printStackTrace();
+			pan.setText("Error : "+e);
 		}
 		while(!Thread.interrupted()){
 			try {
@@ -82,6 +90,7 @@ public class Annuaire extends JFrame {
 		}
 		if(listDest.length()>5)
 			listDest.remove(listDest.length()-1);
+		pan.setText(port+" s'est connecté !\nClients récents : "+listDest.toString());
 	}
 
 	private static JSONObject lire() {
