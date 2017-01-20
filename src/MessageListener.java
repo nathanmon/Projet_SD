@@ -72,7 +72,7 @@ public class MessageListener implements Runnable{
 								Client.tchat.setText("Vous : "+json.getString("msg")+"\n"+Client.tchat.getText());
 							}
 							if (type.equals("salon")){
-								Client.tchat.setText("Vous avez rejoint "+json.getJSONArray("roomList")+" au "+json.getString("salon")+".\n"+Client.tchat.getText());
+								Client.tchat.setText("Vous avez rejoint "+json.getJSONArray("roomList")+" au salon "+json.getString("salon")+".\n"+Client.tchat.getText());
 							}
 						}
 					}
