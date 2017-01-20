@@ -12,7 +12,6 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import javax.swing.BoxLayout;
-import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -25,7 +24,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Client extends JFrame  implements ActionListener {
+public class Client extends JFrame implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 	public static int myId = 1;
@@ -46,8 +45,9 @@ public class Client extends JFrame  implements ActionListener {
 	private static JTextField pseudoField;
 	public static JSONArray listSalon =  new JSONArray().put("Salon 1");
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public Client() {
-		super("Tchat");
+		super("Client de Chat");
 		setMinimumSize(new Dimension(500, 500));
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 		setLocationRelativeTo(null);
@@ -64,7 +64,6 @@ public class Client extends JFrame  implements ActionListener {
 		try {
 			boxSalon = new JComboBox(JSONArrayToStringTab(listSalon));
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		boxSalon.addActionListener(this);
@@ -353,7 +352,6 @@ public class Client extends JFrame  implements ActionListener {
 		panel.add(valider);
 		frame.add(panel);
 		frame.setVisible(true);
-		JSONObject newSalon;
 		valider.addActionListener(new ActionListener(){
 
 			@Override
@@ -367,7 +365,6 @@ public class Client extends JFrame  implements ActionListener {
 				try {
 					envoyer(new JSONObject().put("type", "newSalon").put("nomSalon", zoneName.getText()).put("id", myId));
 				} catch (JSONException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
